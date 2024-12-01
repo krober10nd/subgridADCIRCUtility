@@ -33,7 +33,7 @@ The following link will take you to a data repository (need to figure out where 
 
 1. pandas
 2. numpy
-3. matplotlib
+3. matplotlib (if you want to visualize stuff)
 4. gdal
 5. time
 6. netCDF4
