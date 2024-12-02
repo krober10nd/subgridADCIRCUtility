@@ -13,6 +13,7 @@ import time
 # third party imports
 import numpy as np
 from scipy.interpolate import griddata
+from tqdm import tqdm
 
 # local imports
 from . import file_io as io
@@ -128,7 +129,6 @@ def calculateSubgridCorrection(controlFilename):
     meshLon = np.asarray(mesh[0]["Longitude"]).astype("float32")
     meshLat = np.asarray(mesh[0]["Latitude"]).astype("float32")
     numNode = mesh[2]
-    numEle = mesh[3]
 
     # first mind the maximum number of elements connected to a vertex
     maxConnectedVertex = geom.find_max_connected_vertex(mesh)
@@ -137,10 +137,10 @@ def calculateSubgridCorrection(controlFilename):
     vertexData = np.empty((numNode, maxConnectedVertex, 8))
     vertexData[:, :, :] = np.nan
 
-    vertexConnect, countArray = geom.determine_vertex_element_connectivity(mesh)
+    vertexConnect, countArray = geom.determine_vertex_element_connectivity(mesh, maxConnectedVertex)
 
     # fill this vertex Data Array
-    for i in range(numNode):
+    for i in tqdm(range(numNode), desc="Filling vertex data array...", total=numNode):
         # find connected elements (this is the slowest part)
         connectedElements = vertexConnect[i, : countArray[i]]
         # fill in vertex data
@@ -207,20 +207,20 @@ def calculateSubgridCorrection(controlFilename):
     # keep track of total calc time
     startTotal = time.time()
 
-    for i in range(len(demFilenameList)):
+    for i in tqdm(range(len(demFilenameList)), desc="Calculating subgrid correction factors...", total=len(demFilenameList)):
 
         # all variables the same as before
         elevationData = io.importDEM(demFilenameList[i])
         landcoverData = io.importDEM(landcoverFilenameList[i])
 
         # get data out of dems
-        bathyTopo = elevationData[0].astype("float32")
-        lon = elevationData[3]
-        lat = elevationData[4]
+        bathyTopo = elevationData[2].astype("float32")
+        lon = elevationData[0]
+        lat = elevationData[1]
 
         elevationData = None  # deallocate
 
-        manningsn = landcoverData[0].astype("float32")  # array of mannings n values
+        manningsn = landcoverData[2].astype("float32")  # array of mannings n values
 
         landcoverData = None  # deallocate
 

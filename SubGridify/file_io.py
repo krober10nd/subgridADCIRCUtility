@@ -338,6 +338,8 @@ def read_control_file(controlFilename):
            line = ctrF.readline().rstrip()
            line = re.split(" *= *", line)
            manningsnTableFilename = line[1]  # get the mannings n table filename
+       else: 
+              manningsnTableFilename = None
        # now read in the elevation array
        line = ctrF.readline().rstrip()
        line = re.split(" *= *", line)
